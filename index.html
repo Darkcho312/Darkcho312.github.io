@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SemiHub - Premium Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #020617;
+            overflow-x: hidden;
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .hover-glow:hover {
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+            border-color: rgba(6, 182, 212, 0.5);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #22d3ee, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+
+<body class="text-slate-100 font-sans min-h-screen flex flex-col justify-between relative">
+
+    <!-- Background Animated Blobs -->
+    <div class="fixed inset-0 w-full h-full z-0 overflow-hidden pointer-events-none">
+        <div
+            class="absolute top-0 -left-4 w-72 h-72 bg-cyan-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob">
+        </div>
+        <div class="absolute top-0 -right-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob animation-delay-2000"
+            style="animation-delay: 2s;"></div>
+        <div class="absolute -bottom-8 left-20 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob animation-delay-4000"
+            style="animation-delay: 4s;"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="glass-card sticky top-0 z-50 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <span class="text-3xl font-extrabold tracking-widest gradient-text flex items-center gap-2">
+                <svg class="w-8 h-8 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                SemiHub
+            </span>
+            <div
+                class="glass-card px-5 py-2.5 rounded-full flex items-center space-x-3 transition-transform hover:scale-105 cursor-default">
+                <div
+                    class="w-6 h-6 rounded-full bg-gradient-to-tr from-amber-300 to-orange-500 flex items-center justify-center text-xs shadow-[0_0_10px_rgba(251,191,36,0.5)]">
+                    🪙</div>
+                <div class="flex flex-col">
+                    <span
+                        class="text-[10px] text-slate-400 uppercase tracking-wider font-bold leading-none">Mileage</span>
+                    <span id="global-mileage"
+                        class="text-sm font-extrabold text-amber-300 leading-none mt-1 transition-all duration-300">0
+                        P</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-10 flex-1 w-full z-10">
+
+        <!-- Left/Center Column -->
+        <div class="lg:col-span-2 space-y-10">
+
+            <!-- Field Selection -->
+            <section
+                class="glass-card p-8 rounded-3xl space-y-8 hover-glow transition-all duration-500 group relative overflow-hidden">
+                <div
+                    class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-cyan-500/10 to-transparent rounded-bl-full">
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-3">
+                        <span class="p-2 bg-cyan-500/10 rounded-lg text-cyan-400 shadow-inner">🎮</span> 반도체 클래스 : 학습
+                        분야 선택
+                    </h2>
+                    <p class="text-sm text-slate-400 mt-2 ml-12">원하는 분야를 선택하면 새 창에서 PPT 학습과 퀴즈가 시작됩니다.</p>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 justify-items-center">
+
+                    <!-- Field 1 -->
+                    <div class="text-center space-y-3 group/item">
+                        <button onclick="openStudyWindow('history')"
+                            class="relative w-24 h-24 bg-gradient-to-tr from-cyan-600 to-blue-500 rounded-2xl flex flex-col items-center justify-center font-bold shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.6)] hover:-translate-y-2 transition-all duration-300 border border-cyan-300/50 text-slate-950 overflow-hidden z-10">
+                            <div
+                                class="absolute inset-0 bg-white/20 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                            </div>
+                            <span class="text-[11px] font-black tracking-widest opacity-80">PART 1</span>
+                            <span class="text-sm font-extrabold mt-1">역사/개요</span>
+                        </button>
+                        <p
+                            class="text-xs font-bold text-cyan-400 bg-cyan-950/50 px-3 py-1 rounded-full inline-block border border-cyan-800/50">
+                            🔥 +500 P</p>
+                    </div>
+
+                    <!-- Field 2 -->
+                    <div class="text-center space-y-3 group/item">
+                        <button onclick="openStudyWindow('devices')"
+                            class="relative w-24 h-24 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-2xl flex flex-col items-center justify-center font-bold shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] hover:-translate-y-2 transition-all duration-300 border border-emerald-300/50 text-slate-950 overflow-hidden z-10">
+                            <div
+                                class="absolute inset-0 bg-white/20 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                            </div>
+                            <span class="text-[11px] font-black tracking-widest opacity-80">PART 2</span>
+                            <span class="text-sm font-extrabold mt-1">소자/회로</span>
+                        </button>
+                        <p
+                            class="text-xs font-bold text-emerald-400 bg-emerald-950/50 px-3 py-1 rounded-full inline-block border border-emerald-800/50">
+                            🔥 +500 P</p>
+                    </div>
+
+                    <!-- Field 3 -->
+                    <div class="text-center space-y-3 group/item">
+                        <button onclick="openStudyWindow('process')"
+                            class="relative w-24 h-24 bg-gradient-to-tr from-purple-500 to-fuchsia-400 rounded-2xl flex flex-col items-center justify-center font-bold shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.6)] hover:-translate-y-2 transition-all duration-300 border border-purple-300/50 text-white overflow-hidden z-10">
+                            <div
+                                class="absolute inset-0 bg-white/20 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                            </div>
+                            <span class="text-[11px] font-black tracking-widest opacity-80">PART 3</span>
+                            <span class="text-sm font-extrabold mt-1">8대 공정</span>
+                        </button>
+                        <p
+                            class="text-xs font-bold text-purple-400 bg-purple-950/50 px-3 py-1 rounded-full inline-block border border-purple-800/50">
+                            🔥 +500 P</p>
+                    </div>
+
+                    <!-- Field 4 -->
+                    <div class="text-center space-y-3 group/item">
+                        <button onclick="openStudyWindow('future')"
+                            class="relative w-24 h-24 bg-gradient-to-tr from-rose-500 to-orange-400 rounded-2xl flex flex-col items-center justify-center font-bold shadow-[0_0_20px_rgba(244,63,94,0.3)] hover:shadow-[0_0_30px_rgba(244,63,94,0.6)] hover:-translate-y-2 transition-all duration-300 border border-rose-300/50 text-white overflow-hidden z-10">
+                            <div
+                                class="absolute inset-0 bg-white/20 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                            </div>
+                            <span class="text-[11px] font-black tracking-widest opacity-80">PART 4</span>
+                            <span class="text-sm font-extrabold mt-1">미래기술</span>
+                        </button>
+                        <p
+                            class="text-xs font-bold text-rose-400 bg-rose-950/50 px-3 py-1 rounded-full inline-block border border-rose-800/50">
+                            🔥 +500 P</p>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Company History -->
+            <section class="glass-card p-8 rounded-3xl space-y-6 hover-glow transition-all duration-500">
+                <h2 class="text-xl font-bold text-white flex items-center gap-3">
+                    <span class="p-2 bg-indigo-500/10 rounded-lg text-indigo-400 shadow-inner">🏢</span> 거인의 어깨 (유망 기업
+                    성장 히스토리)
+                </h2>
+                <div
+                    class="bg-gradient-to-r from-indigo-900/40 to-slate-900/40 p-6 rounded-2xl border border-indigo-500/20 flex flex-col sm:flex-row justify-between items-center gap-6 shadow-inner hover:border-indigo-500/40 transition-colors">
+                    <div class="flex-1">
+                        <span
+                            class="text-[10px] text-indigo-300 bg-indigo-900/60 px-2.5 py-1 rounded-md border border-indigo-700 font-bold uppercase tracking-wider">🚀
+                            추천 테크 기업</span>
+                        <h3 class="text-lg font-bold text-slate-100 mt-3 leading-snug">[제휴 기업 A사] 차세대 HBM 본딩 장비 기술 역사와
+                            비전</h3>
+                        <p class="text-sm text-slate-400 mt-2 line-clamp-1">엔비디아가 주목한 열압착 본딩 기술의 비밀을 알아봅니다.</p>
+                    </div>
+                    <button id="company-btn" onclick="learnCompanyHistory()"
+                        class="group relative overflow-hidden bg-slate-800 hover:bg-indigo-600 border border-indigo-500/50 text-indigo-300 hover:text-white text-sm font-bold px-6 py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-indigo-500/25 shrink-0">
+                        <div
+                            class="absolute inset-0 w-0 bg-indigo-500 transition-all duration-500 ease-out group-hover:w-full opacity-50 z-0">
+                        </div>
+                        <span class="relative z-10 flex items-center gap-2">📖 학습하고 +200P 받기</span>
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <!-- Right Column -->
+        <div class="space-y-10">
+            <!-- Premium Market Report -->
+            <section
+                class="glass-card p-8 rounded-3xl space-y-6 hover-glow transition-all duration-500 h-full flex flex-col">
+                <h3 class="text-xl font-bold text-white flex items-center gap-3">
+                    <span class="p-2 bg-emerald-500/10 rounded-lg text-emerald-400 shadow-inner">📈</span> 프리미엄 시장 리포트
+                </h3>
+
+                <div
+                    class="flex-1 bg-slate-900/50 p-6 rounded-2xl border border-slate-700/50 relative overflow-hidden flex flex-col justify-center group hover:border-emerald-500/30 transition-colors">
+
+                    <!-- Decorative background element -->
+                    <div
+                        class="absolute -right-10 -top-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-500 pointer-events-none">
+                    </div>
+
+                    <h4 class="text-sm font-bold text-slate-200 leading-relaxed z-10 relative">2026 글로벌 파운드리 미세 공정 로드맵 및
+                        벤더 서플라이 체인 심층 리포트</h4>
+
+                    <div id="report-lock"
+                        class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 space-y-4 z-20 transition-opacity duration-500">
+                        <div
+                            class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700 text-xl shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+                            🔒</div>
+                        <button onclick="unlockPremiumReport(500)"
+                            class="bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 text-sm font-extrabold px-5 py-2.5 rounded-xl transition-all hover:scale-105 shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:shadow-[0_0_30px_rgba(245,158,11,0.5)] flex items-center gap-2">
+                            🪙 500 P 로 잠금 해제
+                        </button>
+                    </div>
+
+                    <div id="report-hidden-text"
+                        class="hidden z-10 flex-1 flex flex-col justify-between mt-4 animation-fade-in relative">
+                        <div
+                            class="text-xs text-slate-300 leading-relaxed space-y-3 bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 shadow-inner">
+                            <p>🔓 <span class="text-emerald-400 font-bold">[열람 성공]</span></p>
+                            <p>2나노 공정의 핵심 패권은 후면 전력 공급(BSPDN) 기술 선점에 있습니다. 현재 TSMC와 인텔의 로드맵에 따르면 관련 장비 공급사인...</p>
+                            <div
+                                class="h-12 bg-gradient-to-b from-slate-300 to-slate-900 -webkit-background-clip-text text-transparent italic">
+                                (추가 텍스트는 리포트 원문에서 확인 가능합니다. 다운로드 링크 활성화됨)
+                            </div>
+                        </div>
+                        <button
+                            class="mt-4 w-full bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold py-2.5 rounded-xl transition-colors shadow-lg">
+                            📄 전체 PDF 다운로드
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        let userMileage = 0;
+
+        function openStudyWindow(stage) {
+            window.open('study.html', '_blank', 'width=1000,height=700');
+        }
+
+        window.earnMileageFromStage = function (amount) {
+            userMileage += amount;
+            updateMileageUI();
+
+            // Show a floating notification in index.html
+            showNotification(`🎉 축하합니다! 학습을 완료하여 ${amount}P 가 적립되었습니다.`);
+        };
+
+        function learnCompanyHistory() {
+            userMileage += 200;
+            updateMileageUI();
+            const btn = document.getElementById('company-btn');
+            btn.onclick = null;
+            btn.innerHTML = `<span class="relative z-10 flex items-center gap-2 text-slate-400">✅ 학습 완료 (+200P)</span>`;
+            btn.className = "bg-slate-900 border border-slate-800 text-slate-500 text-sm font-bold px-6 py-3 rounded-xl cursor-default transition-all duration-300";
+
+            showNotification(`📚 기업 역사 학습을 완료했습니다! (+200P)`);
+        }
+
+        function unlockPremiumReport(cost) {
+            if (userMileage >= cost) {
+                userMileage -= cost;
+                updateMileageUI();
+
+                const lockScreen = document.getElementById('report-lock');
+                lockScreen.style.opacity = '0';
+                setTimeout(() => {
+                    lockScreen.classList.add('hidden');
+                    const hiddenText = document.getElementById('report-hidden-text');
+                    hiddenText.classList.remove('hidden');
+                    hiddenText.style.animation = "fadeIn 1s ease-in-out forwards";
+                }, 500);
+            } else {
+                alert(`⚠️ 마일리지가 부족합니다!\n현재 잔액: ${userMileage}P (필요: ${cost}P)\n\n왼쪽의 '반도체 클래스'나 '기업 히스토리'를 학습하여 마일리지를 모아보세요!`);
+            }
+        }
+
+        function updateMileageUI() {
+            const mileageEl = document.getElementById('global-mileage');
+            mileageEl.innerText = userMileage.toLocaleString() + ' P';
+
+            // Add a little bump animation
+            const container = mileageEl.closest('.glass-card');
+            container.style.transform = 'scale(1.1)';
+            container.style.borderColor = 'rgba(251,191,36,0.6)';
+            setTimeout(() => {
+                container.style.transform = 'scale(1)';
+                container.style.borderColor = 'rgba(255,255,255,0.05)';
+            }, 300);
+        }
+
+        function showNotification(msg) {
+            const notif = document.createElement('div');
+            notif.className = "fixed bottom-8 right-8 glass-card border-l-4 border-cyan-400 text-white px-6 py-4 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] z-50 transform translate-y-20 opacity-0 transition-all duration-500 font-medium text-sm flex items-center gap-3";
+            notif.innerHTML = `
+                <div class="w-8 h-8 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 border border-cyan-500/30">✨</div>
+                ${msg}
+            `;
+            document.body.appendChild(notif);
+
+            // Animate in
+            setTimeout(() => {
+                notif.classList.remove('translate-y-20', 'opacity-0');
+            }, 100);
+
+            // Animate out
+            setTimeout(() => {
+                notif.classList.add('translate-y-20', 'opacity-0');
+                setTimeout(() => notif.remove(), 500);
+            }, 4000);
+        }
+
+        // Add custom fade in animation dynamically
+        const style = document.createElement('style');
+        style.innerHTML = `@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } } .animation-fade-in { animation: fadeIn 0.8s ease-out forwards; }`;
+        document.head.appendChild(style);
+    </script>
+</body>
+
+</html>
