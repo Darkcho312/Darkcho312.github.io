@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SemiHub - Premium Dashboard</title>
+    <meta name="description" content="반도체 전문 학습 플랫폼 SemiHub. 핵심 학습, 퀴즈 챌린지, 프리미엄 리포트, 반도체 발전사 PPT를 통해 마일리지를 적립하세요.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        },
+                        float: {
+                            '0%,100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-6px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #020617; overflow-x: hidden; }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .hover-glow:hover {
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+            border-color: rgba(6, 182, 212, 0.5);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #22d3ee, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Mileage notification */
+        @keyframes slideUp { from{transform:translateY(20px);opacity:0;} to{transform:translateY(0);opacity:1;} }
+        @keyframes slideDown { from{transform:translateY(0);opacity:1;} to{transform:translateY(20px);opacity:0;} }
+
+        /* Premium badge shimmer */
+        @keyframes shimmer {
+            0%   { background-position: -200% center; }
+            100% { background-position:  200% center; }
+        }
+        .shimmer-btn {
+            background: linear-gradient(90deg, #fbbf24 25%, #fef3c7 50%, #fbbf24 75%);
+            background-size: 200% auto;
+            animation: shimmer 2.5s linear infinite;
+        }
+
+        /* PPT card glow */
+        .ppt-card:hover {
+            box-shadow: 0 0 40px rgba(139,92,246,0.35);
+            border-color: rgba(139,92,246,0.5) !important;
+        }
+
+        /* Marketing card hover */
+        .mkt-card:hover {
+            box-shadow: 0 0 30px rgba(6,182,212,0.25);
+            border-color: rgba(6,182,212,0.4) !important;
+        }
+
+        /* World Map card */
+        .map-card:hover {
+            box-shadow: 0 0 40px rgba(16,185,129,0.3);
+            border-color: rgba(16,185,129,0.5) !important;
+        }
+
+        /* World Map modal */
+        #worldmap-modal {
+            display: none;
+        }
+        #worldmap-modal.active {
+            display: flex;
+        }
+        #worldmap-modal iframe {
+            border: none;
+            width: 100%;
+            height: 100%;
+            border-radius: 0;
+        }
+
+        /* Pulse dot animation for live map */
+        @keyframes pulseDot {
+            0%, 100% { transform: scale(0.8); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+        .pulse-dot {
+            animation: pulseDot 1.8s ease-in-out infinite;
+        }
+
+        /* Subscription plan card */
+        .plan-card {
+            transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+        }
+        .plan-card:hover {
+            transform: translateY(-4px);
+        }
+        .plan-featured {
+            border-color: rgba(251,191,36,0.5) !important;
+            box-shadow: 0 0 30px rgba(251,191,36,0.2);
+        }
+        .plan-featured:hover {
+            box-shadow: 0 0 50px rgba(251,191,36,0.35);
+        }
+
+        @keyframes fadeIn { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+        .animation-fade-in { animation: fadeIn 0.8s ease-out forwards; }
+    </style>
+</head>
+
+<body class="text-slate-100 font-sans min-h-screen flex flex-col justify-between relative">
+
+    <!-- Background Animated Blobs -->
+    <div class="fixed inset-0 w-full h-full z-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-0 -left-4 w-72 h-72 bg-cyan-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob"></div>
+        <div class="absolute top-0 -right-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob" style="animation-delay: 2s;"></div>
+        <div class="absolute -bottom-8 left-20 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob" style="animation-delay: 4s;"></div>
+        <div class="absolute bottom-20 right-10 w-72 h-72 bg-violet-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-10 animate-blob" style="animation-delay: 6s;"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="glass-card sticky top-0 z-50 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <span class="text-3xl font-extrabold tracking-widest gradient-text flex items-center gap-2">
+                <svg class="w-8 h-8 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                SemiHub
+            </span>
+            <div class="flex items-center gap-3">
+                <!-- Premium badge -->
+                <div id="premium-badge" class="hidden glass-card px-4 py-1.5 rounded-full flex items-center gap-2 border border-amber-500/40">
+                    <span class="text-amber-300 text-xs font-black tracking-wider">⭐ PREMIUM</span>
+                </div>
+                <!-- Mileage -->
+                <div class="glass-card px-5 py-2.5 rounded-full flex items-center space-x-3 transition-transform hover:scale-105 cursor-default" id="mileage-widget">
+                    <div class="w-6 h-6 rounded-full bg-gradient-to-tr from-amber-300 to-orange-500 flex items-center justify-center text-xs shadow-[0_0_10px_rgba(251,191,36,0.5)]">🪙</div>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] text-slate-400 uppercase tracking-wider font-bold leading-none">Mileage</span>
+                        <span id="global-mileage" class="text-sm font-extrabold text-amber-300 leading-none mt-1 transition-all duration-300">0 P</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-10 flex-1 w-full z-10">
+
+        <!-- Left/Center Column -->
+        <div class="lg:col-span-2 space-y-10">
+
+            <!-- Learning Platform (Semi-Docs) -->
+            <section class="glass-card p-8 rounded-3xl space-y-6 hover-glow transition-all duration-500 group relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-bl-full"></div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-3">
+                        <span class="p-2 bg-blue-500/10 rounded-lg text-blue-400 shadow-inner">📚</span> Semi-Docs : 핵심 학습 자료
+                    </h2>
+                    <p class="text-sm text-slate-400 mt-2 ml-12">각 분야의 핵심 개념을 학습하고 기초 마일리지를 적립하세요.</p>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 justify-items-center">
+                    <div class="text-center space-y-2 group/item">
+                        <button id="learn-history-btn" onclick="openStudyWindow('history', 'learn')" class="relative w-20 h-20 bg-slate-800 rounded-xl flex flex-col items-center justify-center font-bold hover:shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:-translate-y-1 transition-all border border-blue-500/30 text-slate-200">
+                            <span class="text-[10px] text-blue-400 font-black tracking-widest">PART 1</span>
+                            <span class="text-xs font-bold mt-1">역사/개요</span>
+                        </button>
+                        <p class="text-[10px] font-bold text-slate-400">📚 +100 P</p>
+                    </div>
+                    <div class="text-center space-y-2 group/item">
+                        <button id="learn-devices-btn" onclick="openStudyWindow('devices', 'learn')" class="relative w-20 h-20 bg-slate-800 rounded-xl flex flex-col items-center justify-center font-bold hover:shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:-translate-y-1 transition-all border border-emerald-500/30 text-slate-200">
+                            <span class="text-[10px] text-emerald-400 font-black tracking-widest">PART 2</span>
+                            <span class="text-xs font-bold mt-1">소자/회로</span>
+                        </button>
+                        <p class="text-[10px] font-bold text-slate-400">📚 +100 P</p>
+                    </div>
+                    <div class="text-center space-y-2 group/item">
+                        <button id="learn-process-btn" onclick="openStudyWindow('process', 'learn')" class="relative w-20 h-20 bg-slate-800 rounded-xl flex flex-col items-center justify-center font-bold hover:shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:-translate-y-1 transition-all border border-purple-500/30 text-slate-200">
+                            <span class="text-[10px] text-purple-400 font-black tracking-widest">PART 3</span>
+                            <span class="text-xs font-bold mt-1">8대 공정</span>
+                        </button>
+                        <p class="text-[10px] font-bold text-slate-400">📚 +100 P</p>
+                    </div>
+                    <div class="text-center space-y-2 group/item">
+                        <button id="learn-future-btn" onclick="openStudyWindow('future', 'learn')" class="relative w-20 h-20 bg-slate-800 rounded-xl flex flex-col items-center justify-center font-bold hover:shadow-[0_0_15px_rgba(244,63,94,0.3)] hover:-translate-y-1 transition-all border border-rose-500/30 text-slate-200">
+                            <span class="text-[10px] text-rose-400 font-black tracking-widest">PART 4</span>
+                            <span class="text-xs font-bold mt-1">미래기술</span>
+                        </button>
+                        <p class="text-[10px] font-bold text-slate-400">📚 +100 P</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quiz Platform (Semilingo) -->
+            <section class="glass-card p-8 rounded-3xl space-y-6 hover-glow transition-all duration-500 group relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-amber-500/10 to-transparent rounded-bl-full"></div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-3">
+                        <span class="p-2 bg-amber-500/10 rounded-lg text-amber-400 shadow-inner">🧩</span> Semilingo : 퀴즈 챌린지
+                    </h2>
+                    <p class="text-sm text-slate-400 mt-2 ml-12">학습한 내용을 바탕으로 퀴즈에 도전하고 대량의 마일리지를 획득하세요.</p>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 justify-items-center">
+                    <div class="text-center space-y-3 group/item">
+                        <button id="quiz-history-btn" onclick="openStudyWindow('history', 'quiz')" class="relative w-24 h-24 bg-gradient-to-tr from-cyan-600 to-blue-500 rounded-2xl flex flex-col items-center justify-center font-bold shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.6)] hover:-translate-y-2 transition-all duration-300 border border-cyan-300/50 text-slate-950 overflow-hidden z-10">
+                            <div class="absolute inset-0 bg-white/20 opacity-0 group-hover/item:opacity-100 transition-opacity"></div>
+                            <span class="text-[11px] font-black tracking-widest opacity-80">TEST 1</span>
+                            <span class="text-sm font-extrabold mt-1">역사/개요</span>
+                        </button>
+                        <p class="text-xs font-bold text-amber-400 bg-amber-950/50 px-3 py-1 rounded-full inline-block border border-amber-800/50">🔥 +500 P</p>
+                    </div>
+                    <div class="text-center space-y-3 group/item">
+                        <button id="quiz-devices-btn" onclick="openStudyWindow('devices', 'quiz')" class="relative w-24 h-24 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-2xl flex flex-col items-center justify-center font-bold shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] hover:-translate-y-2 transition-all duration-300 border border-emerald-300/50 text-slate-950 overflow-hidden z-10">
+                            <div class="absolute inset-0 bg-white/20 opacity-0 group-hover/item:opacity-100 transition-opacity"></div>
+                            <span class="text-[11px] font-black tracking-widest opacity-80">TEST 2</span>
+                            <span class="text-sm font-extrabold mt-1">소자/회로</span>
+                        </button>
+                        <p class="text-xs font-bold text-amber-400 bg-amber-950/50 px-3 py-1 rounded-full inline-block border border-amber-800/50">🔥 +500 P</p>
+                    </div>
+                    <div class="text-center space-y-3 group/item">
+                        <button id="quiz-process-btn" onclick="openStudyWindow('process', 'quiz')" class="relative w-24 h-24 bg-gradient-to-tr from-purple-500 to-fuchsia-400 rounded-2xl flex flex-col items-center justify-center font-bold shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.6)] hover:-translate-y-2 transition-all duration-300 border border-purple-300/50 text-white overflow-hidden z-10">
+                            <div class="absolute inset-0 bg-white/20 opacity-0 group-hover/item:opacity-100 transition-opacity"></div>
+                            <span class="text-[11px] font-black tracking-widest opacity-80">TEST 3</span>
+                            <span class="text-sm font-extrabold mt-1">8대 공정</span>
+                        </button>
+                        <p class="text-xs font-bold text-amber-400 bg-amber-950/50 px-3 py-1 rounded-full inline-block border border-amber-800/50">🔥 +500 P</p>
+                    </div>
+                    <div class="text-center space-y-3 group/item">
+                        <button id="quiz-future-btn" onclick="openStudyWindow('future', 'quiz')" class="relative w-24 h-24 bg-gradient-to-tr from-rose-500 to-orange-400 rounded-2xl flex flex-col items-center justify-center font-bold shadow-[0_0_20px_rgba(244,63,94,0.3)] hover:shadow-[0_0_30px_rgba(244,63,94,0.6)] hover:-translate-y-2 transition-all duration-300 border border-rose-300/50 text-white overflow-hidden z-10">
+                            <div class="absolute inset-0 bg-white/20 opacity-0 group-hover/item:opacity-100 transition-opacity"></div>
+                            <span class="text-[11px] font-black tracking-widest opacity-80">TEST 4</span>
+                            <span class="text-sm font-extrabold mt-1">미래기술</span>
+                        </button>
+                        <p class="text-xs font-bold text-amber-400 bg-amber-950/50 px-3 py-1 rounded-full inline-block border border-amber-800/50">🔥 +500 P</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ★ NEW: 반도체 발전사 PPT -->
+            <section class="glass-card p-8 rounded-3xl space-y-5 ppt-card transition-all duration-500 relative overflow-hidden border border-violet-500/20">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 opacity-70"></div>
+                <div class="absolute -right-16 -top-16 w-48 h-48 bg-violet-600/10 rounded-full blur-2xl pointer-events-none"></div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-3">
+                        <span class="p-2 bg-violet-500/10 rounded-lg text-violet-400 shadow-inner">🎞️</span> 반도체 발전사 : 전체 흐름 PPT
+                    </h2>
+                    <p class="text-sm text-slate-400 mt-2 ml-12">진공관에서 GAA 트랜지스터까지 — 반도체 70년 발전사를 한눈에 정리한 프레젠테이션입니다.</p>
+                </div>
+                <div class="bg-gradient-to-r from-violet-900/30 to-slate-900/30 rounded-2xl border border-violet-500/20 p-6 flex flex-col sm:flex-row justify-between items-center gap-5">
+                    <div class="flex items-center gap-4 flex-1">
+                        <!-- PPT icon -->
+                        <div class="w-16 h-16 rounded-xl bg-violet-900/50 border border-violet-500/30 flex flex-col items-center justify-center flex-shrink-0 animate-float">
+                            <span class="text-2xl">📊</span>
+                            <span class="text-[9px] font-black text-violet-300 tracking-widest mt-0.5">PPT</span>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-violet-300 bg-violet-900/60 px-2.5 py-1 rounded-md border border-violet-700 font-bold uppercase tracking-wider inline-block mb-2">🎯 핵심 발표 자료</div>
+                            <h3 class="text-base font-bold text-slate-100 leading-snug">반도체 발전사 全 흐름<br><span class="text-violet-300">1947 ~ 2nm 시대</span></h3>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2 shrink-0 w-full sm:w-auto">
+                        <button id="ppt-open-btn" onclick="openPPT()"
+                            class="group relative overflow-hidden bg-violet-600 hover:bg-violet-500 border border-violet-400/50 text-white text-sm font-bold px-6 py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-violet-500/30 flex items-center gap-2 justify-center">
+                            <span>📂 PPT 열기</span>
+                        </button>
+                        <p class="text-[10px] text-slate-500 text-center">준비 중인 파일 연결 시 자동 실행</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ★ NEW: 반도체 산업 세계 지도 -->
+            <section class="glass-card p-8 rounded-3xl space-y-5 map-card transition-all duration-500 relative overflow-hidden border border-emerald-500/20">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-500 opacity-70"></div>
+                <div class="absolute -left-10 -bottom-10 w-48 h-48 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-3">
+                        <span class="p-2 bg-emerald-500/10 rounded-lg text-emerald-400 shadow-inner">🗺️</span> 반도체 산업 세계 지도
+                    </h2>
+                    <p class="text-sm text-slate-400 mt-2 ml-12">글로벌 반도체 공급망과 주요 기업의 위치를 인터랙티브 지도에서 확인하세요.</p>
+                </div>
+
+                <!-- Map preview card -->
+                <div class="bg-gradient-to-br from-emerald-900/30 to-slate-900/40 rounded-2xl border border-emerald-500/20 p-5 flex flex-col sm:flex-row justify-between items-center gap-5 group hover:border-emerald-400/40 transition-colors cursor-pointer" onclick="openWorldMap()">
+                    <div class="flex items-center gap-4 flex-1">
+                        <!-- Map preview icon -->
+                        <div class="w-16 h-16 rounded-xl bg-emerald-900/50 border border-emerald-500/30 flex flex-col items-center justify-center flex-shrink-0 relative overflow-hidden">
+                            <span class="text-2xl">🌏</span>
+                            <span class="text-[9px] font-black text-emerald-300 tracking-widest mt-0.5">LIVE</span>
+                            <div class="absolute top-1.5 right-1.5 w-2 h-2 bg-emerald-400 rounded-full pulse-dot"></div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-emerald-300 bg-emerald-900/60 px-2.5 py-1 rounded-md border border-emerald-700 font-bold uppercase tracking-wider inline-block mb-2">🌐 인터랙티브 지도</div>
+                            <h3 class="text-base font-bold text-slate-100 leading-snug">글로벌 반도체 공급망 지도<br><span class="text-emerald-300">파운드리 · 팹리스 · 소재 · 장비</span></h3>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2 shrink-0 w-full sm:w-auto">
+                        <button id="worldmap-open-btn" onclick="openWorldMap()"
+                            class="group relative overflow-hidden bg-emerald-600 hover:bg-emerald-500 border border-emerald-400/50 text-white text-sm font-bold px-6 py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-emerald-500/30 flex items-center gap-2 justify-center">
+                            <span>🗺️ 지도 열기</span>
+                            <span class="text-xs opacity-70 group-hover:opacity-100 transition-opacity">→</span>
+                        </button>
+                        <div class="flex items-center justify-center gap-2 flex-wrap">
+                            <span class="text-[10px] text-emerald-400 bg-emerald-950/50 px-2 py-0.5 rounded border border-emerald-800">🔵 Fab</span>
+                            <span class="text-[10px] text-cyan-400 bg-cyan-950/50 px-2 py-0.5 rounded border border-cyan-800">🟢 IDM</span>
+                            <span class="text-[10px] text-yellow-400 bg-yellow-950/50 px-2 py-0.5 rounded border border-yellow-800">🟡 장비</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ★ NEW: 기업 기술마케팅 공간 -->
+            <section class="glass-card p-8 rounded-3xl space-y-5 mkt-card transition-all duration-500 relative overflow-hidden border border-cyan-500/15">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 opacity-60"></div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-3">
+                        <span class="p-2 bg-cyan-500/10 rounded-lg text-cyan-400 shadow-inner">📡</span> 기업 기술마케팅 센터
+                    </h2>
+                    <p class="text-sm text-slate-400 mt-2 ml-12">반도체 관련 기업의 기술력과 솔루션을 소개합니다. 제휴 문의 및 기술 브리핑을 등록하세요.</p>
+                </div>
+
+                <!-- Marketing cards grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Card A: Featured partner -->
+                    <div class="bg-gradient-to-br from-cyan-900/30 to-slate-900/40 rounded-2xl border border-cyan-500/20 p-5 hover:border-cyan-400/40 transition-colors group cursor-pointer" onclick="learnCompanyHistory()">
+                        <div class="flex items-start justify-between mb-3">
+                            <span class="text-[10px] text-cyan-300 bg-cyan-900/60 px-2.5 py-1 rounded-md border border-cyan-700 font-bold uppercase tracking-wider">🚀 제휴 파트너</span>
+                            <span class="text-[10px] text-emerald-400 font-bold bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800">+200P</span>
+                        </div>
+                        <h3 class="text-sm font-bold text-slate-100 leading-snug mb-1">[제휴 기업 A사] 차세대 HBM 본딩 장비 기술</h3>
+                        <p class="text-xs text-slate-500 mb-4 line-clamp-2">엔비디아가 주목한 열압착 본딩 기술의 비밀과 성장 비전을 알아봅니다.</p>
+                        <div class="flex items-center gap-2 text-xs text-cyan-400 font-bold group-hover:gap-3 transition-all">
+                            <span>📖 기술 브리핑 보기</span>
+                            <span>→</span>
+                        </div>
+                    </div>
+
+                    <!-- Card B: Upcoming -->
+                    <div class="bg-gradient-to-br from-indigo-900/20 to-slate-900/40 rounded-2xl border border-indigo-500/20 p-5 relative overflow-hidden">
+                        <div class="absolute inset-0 backdrop-blur-[1px] bg-slate-950/40 flex items-center justify-center z-10 rounded-2xl">
+                            <div class="text-center">
+                                <div class="text-2xl mb-1">🔜</div>
+                                <p class="text-xs font-bold text-slate-400">파트너 모집 중</p>
+                                <button onclick="showPartnerInquiry()" class="mt-2 text-[10px] text-indigo-300 border border-indigo-600/50 px-3 py-1 rounded-full hover:bg-indigo-900/40 transition-colors">제휴 문의하기</button>
+                            </div>
+                        </div>
+                        <span class="text-[10px] text-indigo-300 font-bold uppercase tracking-wider">🏢 기업 B사</span>
+                        <h3 class="text-sm font-bold text-slate-400 mt-2">차세대 EUV 레티클 세정 솔루션</h3>
+                    </div>
+                </div>
+
+                <!-- CTA bar -->
+                <div class="flex items-center justify-between bg-slate-900/60 rounded-xl border border-slate-700/50 px-5 py-3">
+                    <div>
+                        <p class="text-xs font-bold text-slate-300">기업 기술 소개 등록 문의</p>
+                        <p class="text-[10px] text-slate-500">반도체 관련 기업이라면 누구나 신청 가능합니다.</p>
+                    </div>
+                    <button onclick="showPartnerInquiry()" class="text-xs font-bold text-cyan-300 border border-cyan-600/40 px-4 py-2 rounded-lg hover:bg-cyan-900/30 transition-colors shrink-0">📩 등록 신청</button>
+                </div>
+            </section>
+
+            <!-- Company History (기존) -->
+            <section class="glass-card p-8 rounded-3xl space-y-6 hover-glow transition-all duration-500">
+                <h2 class="text-xl font-bold text-white flex items-center gap-3">
+                    <span class="p-2 bg-indigo-500/10 rounded-lg text-indigo-400 shadow-inner">🏢</span> 거인의 어깨 (유망 기업 성장 히스토리)
+                </h2>
+                <div class="bg-gradient-to-r from-indigo-900/40 to-slate-900/40 p-6 rounded-2xl border border-indigo-500/20 flex flex-col sm:flex-row justify-between items-center gap-6 shadow-inner hover:border-indigo-500/40 transition-colors">
+                    <div class="flex-1">
+                        <span class="text-[10px] text-indigo-300 bg-indigo-900/60 px-2.5 py-1 rounded-md border border-indigo-700 font-bold uppercase tracking-wider">🚀 추천 테크 기업</span>
+                        <h3 class="text-lg font-bold text-slate-100 mt-3 leading-snug">[제휴 기업 A사] 차세대 HBM 본딩 장비 기술 역사와 비전</h3>
+                        <p class="text-sm text-slate-400 mt-2 line-clamp-1">엔비디아가 주목한 열압착 본딩 기술의 비밀을 알아봅니다.</p>
+                    </div>
+                    <button id="company-btn" onclick="learnCompanyHistory()"
+                        class="group relative overflow-hidden bg-slate-800 hover:bg-indigo-600 border border-indigo-500/50 text-indigo-300 hover:text-white text-sm font-bold px-6 py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-indigo-500/25 shrink-0">
+                        <div class="absolute inset-0 w-0 bg-indigo-500 transition-all duration-500 ease-out group-hover:w-full opacity-50 z-0"></div>
+                        <span class="relative z-10 flex items-center gap-2">📖 학습하고 +200P 받기</span>
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <!-- Right Column -->
+        <div class="space-y-8">
+
+            <!-- ★ EXPANDED: Premium Market Reports -->
+            <section class="glass-card p-6 rounded-3xl space-y-5 hover-glow transition-all duration-500 flex flex-col">
+                <h3 class="text-xl font-bold text-white flex items-center gap-3">
+                    <span class="p-2 bg-emerald-500/10 rounded-lg text-emerald-400 shadow-inner">📈</span> 프리미엄 리포트
+                </h3>
+
+                <!-- Report list -->
+                <div class="space-y-3 flex-1">
+                    <!-- Report 1 — unlockable -->
+                    <div class="bg-slate-900/50 p-4 rounded-2xl border border-slate-700/50 relative overflow-hidden group hover:border-emerald-500/30 transition-colors">
+                        <div class="absolute -right-6 -top-6 w-20 h-20 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition-all pointer-events-none"></div>
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <h4 class="text-xs font-bold text-slate-200 leading-relaxed flex-1">2026 글로벌 파운드리 미세 공정 로드맵 및 벤더 서플라이 체인 심층 리포트</h4>
+                            <span class="text-[10px] text-emerald-400 font-black bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800 shrink-0 whitespace-nowrap">500P</span>
+                        </div>
+                        <div id="report1-lock" class="flex items-center justify-between">
+                            <span class="text-[10px] text-slate-500">🔒 잠금 상태</span>
+                            <button onclick="unlockPremiumReport(500, 'report1')" class="bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 text-[10px] font-extrabold px-3 py-1.5 rounded-lg transition-all hover:scale-105 shadow-[0_0_12px_rgba(245,158,11,0.3)] flex items-center gap-1">
+                                🪙 잠금 해제
+                            </button>
+                        </div>
+                        <div id="report1-content" class="hidden text-[10px] text-slate-300 leading-relaxed mt-2 space-y-1.5 animation-fade-in">
+                            <p>🔓 <span class="text-emerald-400 font-bold">[열람 성공]</span></p>
+                            <p>2나노 공정의 핵심 패권은 후면 전력 공급(BSPDN) 기술 선점에 있습니다. TSMC와 인텔의 로드맵에 따르면 관련 장비 공급사인...</p>
+                            <button class="mt-1 w-full bg-slate-700 hover:bg-slate-600 text-white text-[10px] font-bold py-1.5 rounded-lg transition-colors">📄 전체 PDF 다운로드</button>
+                        </div>
+                    </div>
+
+                    <!-- Report 2 -->
+                    <div class="bg-slate-900/50 p-4 rounded-2xl border border-slate-700/50 relative overflow-hidden group hover:border-blue-500/30 transition-colors">
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <h4 class="text-xs font-bold text-slate-200 leading-relaxed flex-1">HBM4 vs GDDR7 — AI 메모리 패권 비교 분석 리포트</h4>
+                            <span class="text-[10px] text-blue-400 font-black bg-blue-950/60 px-2 py-0.5 rounded border border-blue-800 shrink-0 whitespace-nowrap">800P</span>
+                        </div>
+                        <div id="report2-lock" class="flex items-center justify-between">
+                            <span class="text-[10px] text-slate-500">🔒 잠금 상태</span>
+                            <button onclick="unlockPremiumReport(800, 'report2')" class="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-400 hover:to-indigo-400 text-white text-[10px] font-extrabold px-3 py-1.5 rounded-lg transition-all hover:scale-105 shadow-[0_0_12px_rgba(59,130,246,0.3)] flex items-center gap-1">
+                                🪙 잠금 해제
+                            </button>
+                        </div>
+                        <div id="report2-content" class="hidden text-[10px] text-slate-300 leading-relaxed mt-2 animation-fade-in">
+                            <p>🔓 <span class="text-blue-400 font-bold">[열람 성공]</span> HBM4는 1.2TB/s 대역폭으로 GDDR7 대비 압도적 우위를...</p>
+                            <button class="mt-1 w-full bg-slate-700 hover:bg-slate-600 text-white text-[10px] font-bold py-1.5 rounded-lg transition-colors">📄 전체 PDF 다운로드</button>
+                        </div>
+                    </div>
+
+                    <!-- Report 3 -->
+                    <div class="bg-slate-900/50 p-4 rounded-2xl border border-slate-700/50 relative overflow-hidden group hover:border-rose-500/30 transition-colors">
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <h4 class="text-xs font-bold text-slate-200 leading-relaxed flex-1">2026 반도체 장비 밸류체인 — ASML·램리서치·어플라이드 심층 분석</h4>
+                            <span class="text-[10px] text-rose-400 font-black bg-rose-950/60 px-2 py-0.5 rounded border border-rose-800 shrink-0 whitespace-nowrap">600P</span>
+                        </div>
+                        <div id="report3-lock" class="flex items-center justify-between">
+                            <span class="text-[10px] text-slate-500">🔒 잠금 상태</span>
+                            <button onclick="unlockPremiumReport(600, 'report3')" class="bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-400 hover:to-pink-400 text-white text-[10px] font-extrabold px-3 py-1.5 rounded-lg transition-all hover:scale-105 shadow-[0_0_12px_rgba(244,63,94,0.3)] flex items-center gap-1">
+                                🪙 잠금 해제
+                            </button>
+                        </div>
+                        <div id="report3-content" class="hidden text-[10px] text-slate-300 leading-relaxed mt-2 animation-fade-in">
+                            <p>🔓 <span class="text-rose-400 font-bold">[열람 성공]</span> EUV 장비 독점 공급 구조를 기반으로 ASML의 2026 예상 매출은...</p>
+                            <button class="mt-1 w-full bg-slate-700 hover:bg-slate-600 text-white text-[10px] font-bold py-1.5 rounded-lg transition-colors">📄 전체 PDF 다운로드</button>
+                        </div>
+                    </div>
+
+                    <!-- Report 4 -->
+                    <div class="bg-slate-900/50 p-4 rounded-2xl border border-slate-700/50 relative overflow-hidden group hover:border-violet-500/30 transition-colors">
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <h4 class="text-xs font-bold text-slate-200 leading-relaxed flex-1">차세대 패키징 트렌드 — CoWoS·FOPLP·3D IC 기술 완전 정복</h4>
+                            <span class="text-[10px] text-violet-400 font-black bg-violet-950/60 px-2 py-0.5 rounded border border-violet-800 shrink-0 whitespace-nowrap">700P</span>
+                        </div>
+                        <div id="report4-lock" class="flex items-center justify-between">
+                            <span class="text-[10px] text-slate-500">🔒 잠금 상태</span>
+                            <button onclick="unlockPremiumReport(700, 'report4')" class="bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-400 hover:to-fuchsia-400 text-white text-[10px] font-extrabold px-3 py-1.5 rounded-lg transition-all hover:scale-105 shadow-[0_0_12px_rgba(139,92,246,0.3)] flex items-center gap-1">
+                                🪙 잠금 해제
+                            </button>
+                        </div>
+                        <div id="report4-content" class="hidden text-[10px] text-slate-300 leading-relaxed mt-2 animation-fade-in">
+                            <p>🔓 <span class="text-violet-400 font-bold">[열람 성공]</span> CoWoS-S·CoWoS-L 비교와 FOPLP 양산 전환 타임라인...</p>
+                            <button class="mt-1 w-full bg-slate-700 hover:bg-slate-600 text-white text-[10px] font-bold py-1.5 rounded-lg transition-colors">📄 전체 PDF 다운로드</button>
+                        </div>
+                    </div>
+
+                    <!-- Report 5 - Coming soon -->
+                    <div class="bg-slate-900/30 p-4 rounded-2xl border border-dashed border-slate-700/40 flex items-center gap-3 opacity-60">
+                        <span class="text-xl">📋</span>
+                        <div>
+                            <p class="text-xs font-bold text-slate-400">국내 팹리스 밸류에이션 완전 분석</p>
+                            <p class="text-[10px] text-slate-600">🔜 2026년 Q3 출시 예정</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ★ NEW: 프리미엄 구독 결제 -->
+            <section class="glass-card p-6 rounded-3xl space-y-5 relative overflow-hidden border border-amber-500/20" style="background: rgba(10,8,30,0.8);">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400 opacity-80"></div>
+                <div class="absolute -right-12 -bottom-12 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="p-2 bg-amber-500/10 rounded-lg text-amber-400 shadow-inner">⭐</span>
+                        <h3 class="text-xl font-bold text-white">발표자 전용 구독</h3>
+                    </div>
+                    <p class="text-xs text-slate-400 ml-11">프리미엄 리포트 전체 이용권 + 발표 템플릿 + 기업 마케팅 기능</p>
+                </div>
+
+                <!-- Plans -->
+                <div class="space-y-3">
+                    <!-- Basic -->
+                    <div class="plan-card glass-card p-4 rounded-2xl border border-slate-700/50 cursor-pointer" onclick="selectPlan('basic')">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div id="plan-basic-dot" class="w-4 h-4 rounded-full border-2 border-slate-600 transition-all"></div>
+                                <div>
+                                    <p class="text-sm font-bold text-slate-200">Basic</p>
+                                    <p class="text-[10px] text-slate-500">리포트 열람 + 마일리지 2배</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-base font-black text-white">₩9,900</p>
+                                <p class="text-[10px] text-slate-500">/월</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pro — featured -->
+                    <div class="plan-card plan-featured glass-card p-4 rounded-2xl border cursor-pointer relative overflow-hidden" onclick="selectPlan('pro')">
+                        <div class="absolute top-0 right-0 bg-gradient-to-l from-amber-500 to-orange-500 text-[9px] font-black text-slate-950 px-3 py-1 rounded-bl-xl tracking-wider">BEST</div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div id="plan-pro-dot" class="w-4 h-4 rounded-full border-2 border-amber-400 bg-amber-400 transition-all"></div>
+                                <div>
+                                    <p class="text-sm font-bold text-amber-300">Pro</p>
+                                    <p class="text-[10px] text-slate-400">리포트 전체 + 발표 템플릿 + 기업 노출</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-base font-black text-amber-300">₩29,900</p>
+                                <p class="text-[10px] text-slate-500">/월</p>
+                            </div>
+                        </div>
+                        <div class="mt-3 grid grid-cols-2 gap-1.5">
+                            <div class="text-[10px] text-slate-400 flex items-center gap-1"><span class="text-amber-400">✓</span> 전체 리포트 무제한</div>
+                            <div class="text-[10px] text-slate-400 flex items-center gap-1"><span class="text-amber-400">✓</span> PPT 다운로드 무제한</div>
+                            <div class="text-[10px] text-slate-400 flex items-center gap-1"><span class="text-amber-400">✓</span> 마일리지 5배 적립</div>
+                            <div class="text-[10px] text-slate-400 flex items-center gap-1"><span class="text-amber-400">✓</span> 기업 마케팅 배너 등록</div>
+                        </div>
+                    </div>
+
+                    <!-- Enterprise -->
+                    <div class="plan-card glass-card p-4 rounded-2xl border border-slate-700/50 cursor-pointer" onclick="selectPlan('enterprise')">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div id="plan-enterprise-dot" class="w-4 h-4 rounded-full border-2 border-slate-600 transition-all"></div>
+                                <div>
+                                    <p class="text-sm font-bold text-slate-200">Enterprise</p>
+                                    <p class="text-[10px] text-slate-500">팀 단위 · 기업 맞춤 계약</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-base font-black text-slate-300">문의</p>
+                                <p class="text-[10px] text-slate-500">별도 협의</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CTA -->
+                <button id="subscribe-btn" onclick="handleSubscribe()"
+                    class="shimmer-btn w-full text-slate-950 font-extrabold py-3.5 rounded-xl text-sm transition-all hover:scale-[1.02] shadow-[0_0_20px_rgba(251,191,36,0.3)] hover:shadow-[0_0_35px_rgba(251,191,36,0.5)] flex items-center justify-center gap-2">
+                    ⭐ Pro 구독 시작하기
+                </button>
+                <p class="text-[10px] text-slate-600 text-center">언제든지 해지 가능 · 첫 달 무료 체험</p>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- World Map Modal -->
+    <div id="worldmap-modal" class="fixed inset-0 z-50 flex-col bg-slate-950/95 backdrop-blur-sm">
+        <!-- Modal header -->
+        <div class="flex items-center justify-between px-6 py-3 border-b border-slate-800/80 bg-slate-950/80 shrink-0">
+            <div class="flex items-center gap-3">
+                <span class="text-emerald-400 text-xl">🗺️</span>
+                <div>
+                    <h2 class="text-sm font-bold text-white">반도체 산업 세계 지도</h2>
+                    <p class="text-[10px] text-slate-500">Global Semiconductor Industry Map — 인터랙티브 공급망 시각화</p>
+                </div>
+                <span class="text-[10px] text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-md border border-emerald-800 font-bold uppercase tracking-wider ml-2">🌐 LIVE</span>
+            </div>
+            <button onclick="closeWorldMap()" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-bold px-4 py-2 rounded-lg hover:bg-slate-800/60 border border-transparent hover:border-slate-700">
+                <span>✕</span> <span class="text-xs">닫기</span>
+            </button>
+        </div>
+        <!-- Map iframe -->
+        <div class="flex-1 relative">
+            <iframe id="worldmap-iframe" src="" title="반도체 산업 세계 지도" class="absolute inset-0 w-full h-full border-none"></iframe>
+        </div>
+    </div>
+
+    <!-- Partner inquiry modal -->
+    <div id="partner-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="glass-card rounded-3xl p-8 max-w-md w-full border border-cyan-500/30 space-y-4 animation-fade-in">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">📩 기업 마케팅 등록 문의</h3>
+                <button onclick="document.getElementById('partner-modal').classList.add('hidden')" class="text-slate-500 hover:text-white transition-colors text-xl">✕</button>
+            </div>
+            <p class="text-sm text-slate-400">반도체 관련 기업이시라면 SemiHub를 통해 잠재 고객과 연결될 수 있습니다.</p>
+            <div class="space-y-3">
+                <input type="text" placeholder="기업명" class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors">
+                <input type="email" placeholder="담당자 이메일" class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors">
+                <textarea placeholder="문의 내용" rows="3" class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors resize-none"></textarea>
+            </div>
+            <button onclick="submitPartnerInquiry()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold py-3 rounded-xl hover:from-cyan-400 hover:to-blue-500 transition-all shadow-lg">📤 문의 제출</button>
+        </div>
+    </div>
+
+    <script>
+        let userMileage = 0;
+        let selectedPlan = 'pro';
+        let isPremium = false;
+
+        // ── Open study / quiz windows ──
+        function openStudyWindow(stage, mode) {
+            const page = (mode === 'quiz') ? 'semilingo.html' : 'study.html';
+            window.open(`${page}?part=${stage}`, '_blank', 'width=1000,height=700');
+        }
+
+        // ── World Map modal ──
+        function openWorldMap() {
+            const modal = document.getElementById('worldmap-modal');
+            const iframe = document.getElementById('worldmap-iframe');
+            // 아직 로드되지 않았으면 src 설정 (lazy loading)
+            if (!iframe.src || iframe.src === window.location.href) {
+                iframe.src = 'semiconductor-world-map-v8-shifted.html';
+            }
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeWorldMap() {
+            const modal = document.getElementById('worldmap-modal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        // ESC 키로 모달 닫기
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeWorldMap();
+        });
+
+        // ── Mileage from sub-windows ──
+        window.earnMileageFromStage = function (amount) {
+            userMileage += amount;
+            updateMileageUI();
+            showNotification(`🎉 축하합니다! ${amount}P 가 적립되었습니다.`);
+        };
+
+        // ── Company history ──
+        function learnCompanyHistory() {
+            const btn = document.getElementById('company-btn');
+            if (!btn || btn.dataset.done) return;
+            btn.dataset.done = '1';
+            userMileage += 200;
+            updateMileageUI();
+            btn.onclick = null;
+            btn.innerHTML = `<span class="relative z-10 flex items-center gap-2 text-slate-400">✅ 학습 완료 (+200P)</span>`;
+            btn.className = "bg-slate-900 border border-slate-800 text-slate-500 text-sm font-bold px-6 py-3 rounded-xl cursor-default transition-all duration-300";
+            showNotification(`📚 기업 역사 학습을 완료했습니다! (+200P)`);
+        }
+
+        // ── PPT open ──
+        function openPPT() {
+            // PPT 파일이 준비되면 이 경로를 업데이트하세요
+            const pptPath = 'semiconductor_history.pptx';
+            showNotification('📊 PPT 파일을 여는 중입니다... (파일 경로를 연결해 주세요)');
+            // window.open(pptPath, '_blank');
+        }
+
+        // ── Premium report unlock ──
+        function unlockPremiumReport(cost, reportId) {
+            if (userMileage >= cost) {
+                userMileage -= cost;
+                updateMileageUI();
+                document.getElementById(reportId + '-lock').classList.add('hidden');
+                const content = document.getElementById(reportId + '-content');
+                content.classList.remove('hidden');
+                showNotification(`🔓 리포트가 잠금 해제되었습니다! (-${cost}P)`);
+            } else {
+                showNotification(`⚠️ 마일리지 부족! 현재 ${userMileage}P / 필요 ${cost}P`, true);
+            }
+        }
+
+        // ── Plan selection ──
+        function selectPlan(plan) {
+            selectedPlan = plan;
+            ['basic','pro','enterprise'].forEach(p => {
+                const dot = document.getElementById('plan-' + p + '-dot');
+                if (p === plan) {
+                    dot.classList.remove('border-slate-600');
+                    dot.classList.add('border-amber-400', 'bg-amber-400');
+                } else {
+                    dot.classList.add('border-slate-600');
+                    dot.classList.remove('border-amber-400', 'bg-amber-400');
+                }
+            });
+            const btn = document.getElementById('subscribe-btn');
+            const labels = { basic: 'Basic 구독 시작하기', pro: 'Pro 구독 시작하기', enterprise: 'Enterprise 문의하기' };
+            btn.innerHTML = '⭐ ' + labels[plan];
+        }
+
+        // ── Subscribe ──
+        function handleSubscribe() {
+            if (selectedPlan === 'enterprise') {
+                showPartnerInquiry();
+                return;
+            }
+            const prices = { basic: '₩9,900', pro: '₩29,900' };
+            const names  = { basic: 'Basic', pro: 'Pro' };
+            showNotification(`⭐ ${names[selectedPlan]} 플랜 결제 페이지로 이동합니다... (${prices[selectedPlan]}/월)`);
+            setTimeout(() => {
+                isPremium = true;
+                document.getElementById('premium-badge').classList.remove('hidden');
+                showNotification('🎊 프리미엄 구독이 활성화되었습니다! 모든 기능을 이용하세요.');
+            }, 1500);
+        }
+
+        // ── Partner inquiry ──
+        function showPartnerInquiry() {
+            document.getElementById('partner-modal').classList.remove('hidden');
+        }
+        function submitPartnerInquiry() {
+            document.getElementById('partner-modal').classList.add('hidden');
+            showNotification('📩 문의가 접수되었습니다. 빠른 시일 내에 연락드리겠습니다.');
+        }
+
+        // ── Mileage UI ──
+        function updateMileageUI() {
+            const el = document.getElementById('global-mileage');
+            el.innerText = userMileage.toLocaleString() + ' P';
+            const widget = document.getElementById('mileage-widget');
+            widget.style.transform = 'scale(1.12)';
+            widget.style.borderColor = 'rgba(251,191,36,0.6)';
+            setTimeout(() => {
+                widget.style.transform = 'scale(1)';
+                widget.style.borderColor = 'rgba(255,255,255,0.05)';
+            }, 350);
+        }
+
+        // ── Notification ──
+        function showNotification(msg, isWarning = false) {
+            const notif = document.createElement('div');
+            const accent = isWarning ? '#f87171' : '#22d3ee';
+            notif.style.cssText = `
+                position:fixed; bottom:2rem; right:2rem;
+                background:rgba(15,23,42,0.95); backdrop-filter:blur(12px);
+                border:1px solid rgba(255,255,255,0.07);
+                border-left:4px solid ${accent};
+                color:white; padding:1rem 1.5rem; border-radius:1rem;
+                box-shadow:0 10px 40px rgba(0,0,0,0.5);
+                z-index:9999; font-size:0.875rem; font-family:'Outfit',sans-serif;
+                font-weight:500; display:flex; align-items:center; gap:0.75rem;
+                max-width:380px; transform:translateY(20px); opacity:0;
+                transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+            `;
+            notif.innerHTML = `
+                <div style="width:2rem;height:2rem;border-radius:50%;background:rgba(34,211,238,0.1);display:flex;align-items:center;justify-content:center;color:${accent};border:1px solid rgba(34,211,238,0.2);flex-shrink:0;">✨</div>
+                <span>${msg}</span>
+            `;
+            document.body.appendChild(notif);
+            requestAnimationFrame(() => {
+                notif.style.transform = 'translateY(0)';
+                notif.style.opacity = '1';
+            });
+            setTimeout(() => {
+                notif.style.transform = 'translateY(20px)';
+                notif.style.opacity = '0';
+                setTimeout(() => notif.remove(), 400);
+            }, 4000);
+        }
+
+        // Dynamic fade in style
+        const style = document.createElement('style');
+        style.innerHTML = `@keyframes fadeIn { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} } .animation-fade-in{animation:fadeIn 0.8s ease-out forwards;}`;
+        document.head.appendChild(style);
+    </script>
+</body>
+
+</html>
