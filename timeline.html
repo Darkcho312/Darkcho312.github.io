@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>반도체 발전사 타임라인 - SemiHub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #020617;
+            overflow-x: hidden;
+            color: #f1f5f9;
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #a855f7, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Timeline specific styles */
+        .timeline-container {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .timeline-container::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            background: linear-gradient(to bottom, #3b82f6, #a855f7, #ec4899);
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -2px;
+            border-radius: 4px;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+        }
+
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            background-color: inherit;
+            width: 50%;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease-out;
+        }
+
+        .timeline-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            right: -10px;
+            background-color: #0f172a;
+            border: 4px solid #a855f7;
+            top: 15px;
+            border-radius: 50%;
+            z-index: 1;
+            box-shadow: 0 0 10px #a855f7;
+            transition: transform 0.3s;
+        }
+
+        .timeline-item:hover::after {
+            transform: scale(1.3);
+            background-color: #a855f7;
+        }
+
+        .left {
+            left: 0;
+        }
+
+        .right {
+            left: 50%;
+        }
+
+        .left::before {
+            content: " ";
+            height: 0;
+            position: absolute;
+            top: 22px;
+            width: 0;
+            z-index: 1;
+            right: 30px;
+            border: medium solid rgba(15, 23, 42, 0.8);
+            border-width: 10px 0 10px 10px;
+            border-color: transparent transparent transparent rgba(255, 255, 255, 0.1);
+        }
+
+        .right::before {
+            content: " ";
+            height: 0;
+            position: absolute;
+            top: 22px;
+            width: 0;
+            z-index: 1;
+            left: 30px;
+            border: medium solid rgba(15, 23, 42, 0.8);
+            border-width: 10px 10px 10px 0;
+            border-color: transparent rgba(255, 255, 255, 0.1) transparent transparent;
+        }
+
+        .right::after {
+            left: -10px;
+        }
+
+        @media screen and (max-width: 768px) {
+            .timeline-container::after {
+                left: 31px;
+            }
+
+            .timeline-item {
+                width: 100%;
+                padding-left: 70px;
+                padding-right: 25px;
+            }
+
+            .timeline-item::before {
+                left: 60px;
+                border: medium solid white;
+                border-width: 10px 10px 10px 0;
+                border-color: transparent rgba(255, 255, 255, 0.1) transparent transparent;
+            }
+
+            .left::after,
+            .right::after {
+                left: 21px;
+            }
+
+            .right {
+                left: 0%;
+            }
+        }
+    </style>
+</head>
+
+<body class="font-sans antialiased relative">
+    <!-- Background Animated Blobs -->
+    <div class="fixed inset-0 w-full h-full z-0 overflow-hidden pointer-events-none">
+        <div
+            class="absolute top-0 -left-4 w-72 h-72 bg-fuchsia-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob">
+        </div>
+        <div class="absolute top-0 -right-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob"
+            style="animation-delay: 2s;"></div>
+        <div class="absolute -bottom-8 left-20 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob"
+            style="animation-delay: 4s;"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="glass-card sticky top-0 z-50 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <a href="index.html"
+                class="text-2xl font-extrabold tracking-widest gradient-text flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <span class="text-3xl">⏳</span> Semi-Timeline
+            </a>
+            <button onclick="window.close()"
+                class="text-sm font-bold text-slate-300 bg-slate-800/50 hover:bg-slate-700/50 px-4 py-2 rounded-lg border border-slate-700 transition-colors">
+                ✕ 닫기
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-16 relative z-10">
+        <div class="text-center mb-16">
+            <h1 class="text-4xl md:text-5xl font-black text-white mb-4">반도체 <span class="gradient-text">70년</span>의 역사
+            </h1>
+            <p class="text-slate-400 text-lg">진공관에서 GAA 트랜지스터, 그리고 AI 반도체까지</p>
+        </div>
+
+        <div class="timeline-container">
+            <!-- 1947 -->
+            <div class="timeline-item left">
+                <div
+                    class="glass-card p-6 rounded-2xl border border-violet-500/30 hover:border-violet-400/60 transition-colors group">
+                    <div
+                        class="text-2xl font-black text-violet-400 mb-2 group-hover:scale-105 transform origin-left transition-transform">
+                        1947</div>
+                    <h3 class="text-xl font-bold text-white mb-3">최초의 트랜지스터 발명</h3>
+                    <p class="text-sm text-slate-300 leading-relaxed">미국 벨 연구소의 존 바딘, 월터 브래튼, 윌리엄 쇼클리가 점접촉 트랜지스터를
+                        발명했습니다. 이는 진공관을 대체하며 현대 전자공학의 시작을 알렸습니다.</p>
+                </div>
+            </div>
+
+            <!-- 1958 -->
+            <div class="timeline-item right">
+                <div
+                    class="glass-card p-6 rounded-2xl border border-blue-500/30 hover:border-blue-400/60 transition-colors group">
+                    <div
+                        class="text-2xl font-black text-blue-400 mb-2 group-hover:scale-105 transform origin-left transition-transform">
+                        1958</div>
+                    <h3 class="text-xl font-bold text-white mb-3">집적회로(IC)의 탄생</h3>
+                    <p class="text-sm text-slate-300 leading-relaxed">텍사스 인스트루먼트(TI)의 잭 킬비가 여러 전자 부품을 하나의 게르마늄 기판 위에 구현한
+                        최초의 집적회로를 발명했습니다.</p>
+                </div>
+            </div>
+
+            <!-- 1965 -->
+            <div class="timeline-item left">
+                <div
+                    class="glass-card p-6 rounded-2xl border border-cyan-500/30 hover:border-cyan-400/60 transition-colors group">
+                    <div
+                        class="text-2xl font-black text-cyan-400 mb-2 group-hover:scale-105 transform origin-left transition-transform">
+                        1965</div>
+                    <h3 class="text-xl font-bold text-white mb-3">무어의 법칙 발표</h3>
+                    <p class="text-sm text-slate-300 leading-relaxed">페어차일드 반도체의 고든 무어(이후 인텔 공동 창업자)가 "마이크로칩에 저장할 수 있는
+                        데이터의 양이 18~24개월마다 2배씩 증가한다"는 법칙을 발표했습니다.</p>
+                </div>
+            </div>
+
+            <!-- 1971 -->
+            <div class="timeline-item right">
+                <div
+                    class="glass-card p-6 rounded-2xl border border-emerald-500/30 hover:border-emerald-400/60 transition-colors group">
+                    <div
+                        class="text-2xl font-black text-emerald-400 mb-2 group-hover:scale-105 transform origin-left transition-transform">
+                        1971</div>
+                    <h3 class="text-xl font-bold text-white mb-3">최초의 상용 마이크로프로세서</h3>
+                    <p class="text-sm text-slate-300 leading-relaxed">인텔이 4비트 마이크로프로세서 'Intel 4004'를 출시했습니다. 하나의 칩에
+                        중앙처리장치(CPU)를 담아 PC 혁명의 기반을 마련했습니다.</p>
+                </div>
+            </div>
+
+            <!-- 1980s -->
+            <div class="timeline-item left">
+                <div
+                    class="glass-card p-6 rounded-2xl border border-amber-500/30 hover:border-amber-400/60 transition-colors group">
+                    <div
+                        class="text-2xl font-black text-amber-400 mb-2 group-hover:scale-105 transform origin-left transition-transform">
+                        1980s</div>
+                    <h3 class="text-xl font-bold text-white mb-3">메모리 반도체의 도약</h3>
+                    <p class="text-sm text-slate-300 leading-relaxed">PC 보급과 함께 DRAM 수요가 폭발적으로 증가했습니다. 일본 기업들이 시장을
+                        주도했으나, 80년대 후반 한국의 삼성전자가 본격적으로 추격하기 시작했습니다.</p>
+                </div>
+            </div>
+
+            <!-- 1990s -->
+            <div class="timeline-item right">
+                <div
+                    class="glass-card p-6 rounded-2xl border border-orange-500/30 hover:border-orange-400/60 transition-colors group">
+                    <div
+                        class="text-2xl font-black text-orange-400 mb-2 group-hover:scale-105 transform origin-left transition-transform">
+                        1990s</div>
+                    <h3 class="text-xl font-bold text-white mb-3">PC 시대와 한국의 메모리 1위</h3>
+                    <p class="text-sm text-slate-300 leading-relaxed">인텔의 펜티엄 프로세서와 윈도우 운영체제의 보급으로 PC 시대가 만개했습니다. 1992년
+                        삼성전자는 세계 최초로 64M DRAM을 개발하며 메모리 시장 1위에 등극합니다.</p>
+                </div>
+            </div>
+
+            <!-- 2007 -->
+            <div class="timeline-item left">
+                <div
+                    class="glass-card p-6 rounded-2xl border border-rose-500/30 hover:border-rose-400/60 transition-colors group">
+                    <div
+                        class="text-2xl font-black text-rose-400 mb-2 group-hover:scale-105 transform origin-left transition-transform">
+                        2007</div>
+                    <h3 class="text-xl font-bold text-white mb-3">모바일 혁명과 AP</h3>
+                    <p class="text-sm text-slate-300 leading-relaxed">애플 아이폰의 출시로 스마트폰 시대가 열렸습니다. 저전력, 고성능을 요구하는 모바일
+                        애플리케이션 프로세서(AP)와 낸드플래시 시장이 급성장했습니다.</p>
+                </div>
+            </div>
+
+            <!-- 2012 -->
+            <div class="timeline-item right">
+                <div
+                    class="glass-card p-6 rounded-2xl border border-pink-500/30 hover:border-pink-400/60 transition-colors group">
+                    <div
+                        class="text-2xl font-black text-pink-400 mb-2 group-hover:scale-105 transform origin-left transition-transform">
+                        2012</div>
+                    <h3 class="text-xl font-bold text-white mb-3">3D 트랜지스터 시대 (FinFET)</h3>
+                    <p class="text-sm text-slate-300 leading-relaxed">평면(2D) 구조의 한계를 극복하기 위해 인텔이 아이비브릿지(Ivy Bridge)
+                        프로세서에 22nm FinFET 공정을 최초로 상용화했습니다.</p>
+                </div>
+            </div>
+
+            <!-- 2019 -->
+            <div class="timeline-item left">
+                <div
+                    class="glass-card p-6 rounded-2xl border border-fuchsia-500/30 hover:border-fuchsia-400/60 transition-colors group">
+                    <div
+                        class="text-2xl font-black text-fuchsia-400 mb-2 group-hover:scale-105 transform origin-left transition-transform">
+                        2019</div>
+                    <h3 class="text-xl font-bold text-white mb-3">EUV 노광 기술 도입</h3>
+                    <p class="text-sm text-slate-300 leading-relaxed">ASML의 극자외선(EUV) 장비가 파운드리 양산에 본격 적용되며 7nm 이하의 초미세
+                        공정 시대가 열렸습니다. TSMC와 삼성전자의 경쟁이 심화되었습니다.</p>
+                </div>
+            </div>
+
+            <!-- 2022+ -->
+            <div class="timeline-item right">
+                <div
+                    class="glass-card p-6 rounded-2xl border border-cyan-400/30 hover:border-cyan-300/60 transition-colors group relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-32 h-32 bg-cyan-500/20 blur-2xl rounded-full"></div>
+                    <div
+                        class="text-2xl font-black text-cyan-300 mb-2 group-hover:scale-105 transform origin-left transition-transform">
+                        2022 ~ Present</div>
+                    <h3 class="text-xl font-bold text-white mb-3">AI 반도체와 차세대 트랜지스터</h3>
+                    <p class="text-sm text-slate-300 leading-relaxed">ChatGPT의 등장으로 엔비디아의 GPU와 HBM(고대역폭 메모리) 수요가 폭증했습니다.
+                        또한 삼성전자가 세계 최초로 3nm GAA(Gate-All-Around) 공정 양산을 시작했습니다.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 스크롤 시 타임라인 항목 나타나기 효과
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.timeline-item').forEach(item => {
+            observer.observe(item);
+        });
+    </script>
+</body>
+
+</html>

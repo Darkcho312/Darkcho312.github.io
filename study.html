@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Semi-Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Outfit', 'sans-serif'] } } } }</script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #020617;
+      color: #e2e8f0;
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .glass {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.6);
+      border-radius: 1.5rem;
+    }
+
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      width: 500px;
+      height: 500px;
+      filter: blur(100px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.09;
+    }
+
+    #blob1 {
+      top: -150px;
+      right: -150px;
+    }
+
+    #blob2 {
+      bottom: -150px;
+      left: -150px;
+    }
+
+    /* slide fade */
+    .slide-panel {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .slide-panel.active {
+      display: block;
+      opacity: 1;
+    }
+
+    /* bullet cards */
+    .bcard {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 0.875rem;
+      padding: 1rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .bcard:hover {
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-2px);
+    }
+
+    /* compare cards */
+    .ccard {
+      border-radius: 1rem;
+      padding: 1rem 1.2rem;
+    }
+
+    /* timeline */
+    .tl {
+      position: relative;
+      padding-left: 2rem;
+      padding-bottom: 0.9rem;
+    }
+
+    .tl::before {
+      content: '';
+      position: absolute;
+      left: 0.34rem;
+      top: 1rem;
+      bottom: 0;
+      width: 2px;
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .tl:last-child::before {
+      display: none;
+    }
+
+    .tldot {
+      position: absolute;
+      left: 0;
+      top: 0.12rem;
+      width: 0.75rem;
+      height: 0.75rem;
+      border-radius: 50%;
+    }
+
+    /* nav buttons */
+    .btn-nav {
+      padding: 0.7rem 1.6rem;
+      border-radius: 0.75rem;
+      font-weight: 800;
+      font-size: 0.875rem;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .btn-nav:hover {
+      transform: scale(1.04);
+    }
+
+    .btn-prev {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #64748b;
+      cursor: not-allowed;
+    }
+
+    .btn-prev.enabled {
+      color: #e2e8f0;
+      cursor: pointer;
+    }
+
+    .btn-prev.enabled:hover {
+      background: #334155;
+    }
+
+    .progress-pip {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      transition: background 0.3s, transform 0.3s;
+    }
+
+    .progress-pip.done {
+      background: white;
+      transform: scale(1.2);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="blob1" class="blob"></div>
+  <div id="blob2" class="blob"></div>
+
+  <div
+    style="position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;padding:1.5rem;max-width:900px;margin:0 auto;">
+
+    <!-- HEADER -->
+    <header class="glass"
+      style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.5rem;margin-bottom:1.5rem;position:sticky;top:1rem;z-index:20;">
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <div id="hd-badge"
+          style="width:2.2rem;height:2.2rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:0.9rem;color:white;flex-shrink:0;">
+        </div>
+        <div>
+          <div style="font-size:10px;color:#64748b;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;">📚
+            Semi-Docs</div>
+          <div id="hd-title" style="font-size:0.85rem;font-weight:800;line-height:1;margin-top:2px;"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;" id="pip-row"></div>
+    </header>
+
+    <!-- SLIDE AREA -->
+    <main style="flex:1;display:flex;align-items:center;margin-bottom:1.5rem;">
+      <div id="slide-wrap" class="glass"
+        style="width:100%;padding:2.5rem 3rem;min-height:420px;position:relative;overflow:hidden;">
+        <!-- rendered by JS -->
+      </div>
+    </main>
+
+    <!-- FOOTER NAV -->
+    <footer style="display:flex;justify-content:space-between;align-items:center;">
+      <button id="btn-prev" class="btn-nav btn-prev" onclick="goSlide(-1)">← 이전</button>
+      <div style="font-size:0.8rem;color:#475569;font-weight:700;">
+        <span id="cur-num" style="color:#22d3ee;font-size:1rem;font-weight:900;">1</span>
+        <span style="margin:0 4px;color:#1e3a5f;">/</span>
+        <span id="tot-num">4</span>
+      </div>
+      <button id="btn-next" class="btn-nav" onclick="goSlide(1)" style="color:white;">다음 슬라이드 →</button>
+    </footer>
+  </div>
+
+  <!-- SUCCESS OVERLAY -->
+  <div id="overlay"
+    style="position:fixed;inset:0;background:rgba(2,6,23,0.96);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:9999;opacity:0;transition:opacity 0.5s;">
+    <div style="font-size:5rem;margin-bottom:1.5rem;animation:bounce 1s infinite;">📚</div>
+    <h1
+      style="font-size:2.8rem;font-weight:900;background:linear-gradient(135deg,#22d3ee,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:0 0 0.75rem;">
+      학습 완료!</h1>
+    <p style="font-size:1.1rem;color:#67e8f9;font-weight:600;">+100P가 메인 지갑에 적립되었습니다.</p>
+    <p style="font-size:0.8rem;color:#475569;margin-top:2rem;letter-spacing:0.1em;">잠시 후 창이 자동으로 닫힙니다...</p>
+  </div>
+  <style>
+    @keyframes bounce {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(-12px)
+      }
+    }
+  </style>
+
+  <script>
+    /* ─── COURSE DATA ─── */
+    const PARTS = {
+      history: {
+        num: 1, title: "역사/개요",
+        grad: "linear-gradient(135deg,#22d3ee,#3b82f6)",
+        blob1: "#06b6d4", blob2: "#3b82f6",
+        nextGrad: "from-cyan-500 to-blue-600",
+        slides: [
+          {
+            type: "default", title: "반도체(Semiconductor)의 본질",
+            body: `반도체는 전기가 잘 통하는 <b style="color:#67e8f9;background:rgba(6,182,212,0.15);padding:1px 6px;border-radius:4px;">도체</b>와 통하지 않는 <b style="color:#fca5a5;background:rgba(239,68,68,0.15);padding:1px 6px;border-radius:4px;">부도체</b>의 중간 성질을 가진 물질입니다.<br><br>실리콘(Si)에 특정 불순물을 주입하는 <span style="color:#fbbf24;border-bottom:1px solid #fbbf24;">'도핑(Doping)'</span> 기술을 통해 전류의 흐름을 정밀하게 제어할 수 있게 됩니다.`
+          },
+          {
+            type: "timeline", title: "트랜지스터와 무어의 법칙",
+            items: [
+              { year: "1947", title: "트랜지스터 발명", desc: "벨 연구소에서 최초 발명. 거대한 진공관 시대를 끝냄." },
+              { year: "1958", title: "집적회로(IC) 탄생", desc: "잭 킬비가 여러 소자를 하나의 실리콘 칩에 통합." },
+              { year: "1965", title: "무어의 법칙 제시", desc: "집적 밀도가 약 24개월마다 2배로 증가한다는 경험 법칙." },
+              { year: "현재", title: "수백억 트랜지스터 시대", desc: "최신 칩 1개에 수백억 개 이상의 트랜지스터가 집적됨." }
+            ]
+          },
+          {
+            type: "bullets", title: "글로벌 반도체 산업 구조",
+            sub: "설계·제조·재료/장비가 각자 전문화된 3단계 분업 구조",
+            items: [
+              { icon: "💡", col: "#60a5fa", title: "팹리스 (Fabless)", desc: "칩 설계 전문. 제조 공장 없음\n대표: 엔비디아, 퀄컴, AMD" },
+              { icon: "🏭", col: "#34d399", title: "파운드리 (Foundry)", desc: "위탁 제조 전문. 설계 없음\n대표: TSMC, 삼성 파운드리" },
+              { icon: "🔬", col: "#c084fc", title: "IDM (종합 반도체)", desc: "설계+제조 모두 수행\n대표: 인텔, SK하이닉스, 삼성" }
+            ]
+          },
+          {
+            type: "compare", title: "한국 반도체의 굴기",
+            left: {
+              label: "🇰🇷 삼성전자", col: "#60a5fa", bg: "rgba(59,130,246,0.1)", border: "rgba(59,130,246,0.3)",
+              items: ["1983년 64K DRAM 자체 개발 성공", "1992년 64M DRAM 세계 최초", "3nm GAA 공정 양산 개시", "HBM3E 공급·AI 반도체 선도"]
+            },
+            right: {
+              label: "🇰🇷 SK하이닉스", col: "#34d399", bg: "rgba(52,211,153,0.1)", border: "rgba(52,211,153,0.3)",
+              items: ["2013년 8GB DRAM 세계 최초 양산", "HBM 시장 점유율 글로벌 1위", "엔비디아 HBM 최우선 공급사", "AI 반도체 시대 핵심 플레이어"]
+            }
+          }
+        ]
+      },
+      devices: {
+        num: 2, title: "소자/회로",
+        grad: "linear-gradient(135deg,#34d399,#2dd4bf)",
+        blob1: "#10b981", blob2: "#14b8a6",
+        nextGrad: "from-emerald-500 to-teal-600",
+        slides: [
+          {
+            type: "timeline", title: "트랜지스터 구조의 진화",
+            items: [
+              { year: "~2011", title: "Planar FET (2D)", desc: "납작한 평면 구조. 소형화할수록 누설 전류 제어가 어려워짐." },
+              { year: "2011", title: "FinFET (3D)", desc: "채널을 수직 지느러미(Fin) 형태로 세움. 누설 전류 대폭 감소." },
+              { year: "2022~", title: "GAA (Gate-All-Around)", desc: "게이트가 채널의 4면 전체를 감쌈. 삼성 3nm 공정부터 양산 적용." }
+            ]
+          },
+          {
+            type: "compare", title: "메모리 vs 시스템 반도체",
+            left: {
+              label: "💾 메모리 반도체", col: "#60a5fa", bg: "rgba(59,130,246,0.1)", border: "rgba(59,130,246,0.3)",
+              items: ["데이터 저장이 목적", "DRAM, NAND Flash", "한국이 세계 1·2위", "시장 비중 약 30%"]
+            },
+            right: {
+              label: "⚙️ 시스템 반도체", col: "#c084fc", bg: "rgba(192,132,252,0.1)", border: "rgba(192,132,252,0.3)",
+              items: ["연산·제어가 목적", "CPU, GPU, NPU, AP", "미국·대만이 주도", "시장 비중 약 70% (고부가)"]
+            }
+          },
+          {
+            type: "bullets", title: "AI 시대의 3대 핵심 칩",
+            sub: "AI 연산 수요 폭발로 칩의 역할이 더욱 세분화되고 있습니다.",
+            items: [
+              { icon: "🖥️", col: "#60a5fa", title: "CPU (중앙처리장치)", desc: "복잡한 연산을 순차 처리\n빠른 단일 코어 성능이 핵심" },
+              { icon: "🎮", col: "#4ade80", title: "GPU (그래픽처리장치)", desc: "수천 개 코어로 병렬 연산\nAI 학습·추론의 핵심 엔진" },
+              { icon: "🧠", col: "#c084fc", title: "NPU (신경망처리장치)", desc: "AI 연산 특화 저전력 칩\n스마트폰·엣지 AI에 필수" }
+            ]
+          },
+          {
+            type: "compare", title: "DRAM vs NAND Flash",
+            left: {
+              label: "⚡ DRAM", col: "#22d3ee", bg: "rgba(6,182,212,0.1)", border: "rgba(6,182,212,0.3)",
+              items: ["전원 끄면 데이터 소멸 (휘발성)", "초고속 읽기/쓰기 속도", "CPU 곁 임시 작업 메모리", "HBM으로 진화하며 AI 핵심화"]
+            },
+            right: {
+              label: "💿 NAND Flash", col: "#fbbf24", bg: "rgba(251,191,36,0.1)", border: "rgba(251,191,36,0.3)",
+              items: ["전원 꺼도 데이터 유지 (비휘발성)", "상대적으로 느린 속도", "SSD·USB·스마트폰 저장장치", "3D V-NAND 적층으로 고용량화"]
+            }
+          }
+        ]
+      },
+      process: {
+        num: 3, title: "8대 공정",
+        grad: "linear-gradient(135deg,#a78bfa,#e879f9)",
+        blob1: "#8b5cf6", blob2: "#d946ef",
+        nextGrad: "from-purple-500 to-fuchsia-600",
+        slides: [
+          {
+            type: "default", title: "웨이퍼 제조 → 산화 → 노광",
+            body: `반도체의 시작은 모래(SiO₂)에서 추출한 <b style="color:#c4b5fd;">실리콘 웨이퍼</b>입니다. 고순도 실리콘을 원기둥으로 만들어 얇게 절단·연마합니다.<br><br>이후 표면 보호를 위한 <b style="color:#f0abfc;">산화(Oxidation)</b>, 그리고 빛으로 회로 패턴을 웨이퍼에 찍는 <span style="color:#fbbf24;border-bottom:1px solid #fbbf24;">노광(Photolithography)</span>이 핵심입니다. ASML의 EUV 장비가 이 단계에서 사용됩니다.`
+          },
+          {
+            type: "compare", title: "식각 vs 증착 — 깎기와 쌓기",
+            left: {
+              label: "⚗️ 식각 (Etching)", col: "#a78bfa", bg: "rgba(139,92,246,0.1)", border: "rgba(139,92,246,0.3)",
+              items: ["불필요한 부분을 선택적으로 제거", "건식 식각: 플라즈마 이온 사용", "습식 식각: 화학 용액 사용", "실제 회로 패턴을 형성하는 공정"]
+            },
+            right: {
+              label: "🧱 증착 (Deposition)", col: "#f0abfc", bg: "rgba(217,70,239,0.1)", border: "rgba(217,70,239,0.3)",
+              items: ["웨이퍼 위에 얇은 막을 형성", "CVD: 화학기상증착법", "PVD: 물리기상증착법", "절연막·도전막 형성에 사용"]
+            }
+          },
+          {
+            type: "bullets", title: "이온 주입 / CMP / 금속 배선",
+            sub: "회로의 전기적 특성을 완성하는 핵심 공정들",
+            items: [
+              { icon: "⚡", col: "#fde68a", title: "이온 주입 (Ion Implantation)", desc: "불순물 이온을 고속으로 주입\n트랜지스터의 전기 특성을 정밀 결정" },
+              { icon: "💎", col: "#60a5fa", title: "CMP (화학기계적 연마)", desc: "표면을 나노미터 수준으로 평탄화\n다층 회로 적층의 필수 전제 조건" },
+              { icon: "🔗", col: "#fb923c", title: "금속 배선 (Metallization)", desc: "구리(Cu) 배선으로 소자들을 연결\n수십 층에 달하는 미세 배선망 형성" }
+            ]
+          },
+          {
+            type: "bullets", title: "패키징 & 테스트 — 최종 단계",
+            sub: "웨이퍼에서 완성된 제품이 되는 마지막 여정",
+            items: [
+              { icon: "🔍", col: "#f87171", title: "EDS (다이 선별)", desc: "웨이퍼 상태에서 불량 다이 선별\n이 단계에서 수율(Yield)이 결정됨" },
+              { icon: "📦", col: "#c084fc", title: "어셈블리 (패키징)", desc: "다이 절단 후 기판에 부착·봉지\nAdvanced Packaging 기술로 진화 중" },
+              { icon: "✅", col: "#4ade80", title: "파이널 테스트", desc: "최종 성능·신뢰성 검증 완료\n통과한 칩만 시장에 출하" }
+            ]
+          }
+        ]
+      },
+      future: {
+        num: 4, title: "미래기술",
+        grad: "linear-gradient(135deg,#fb7185,#fb923c)",
+        blob1: "#f43f5e", blob2: "#f97316",
+        nextGrad: "from-rose-500 to-orange-600",
+        slides: [
+          {
+            type: "default", title: "어드밴스드 패키징의 부상",
+            body: `미세화 공정이 물리적 한계에 부딪히면서, 여러 칩을 레고처럼 쌓고 연결하는 <b style="color:#fda4af;">어드밴스드 패키징(Advanced Packaging)</b>이 새로운 전장이 되었습니다.<br><br><b style="color:#fdba74;">칩렛(Chiplet)</b> 방식으로 서로 다른 공정의 칩들을 하나의 패키지에 통합하여 성능과 비용 효율을 동시에 극대화합니다.`
+          },
+          {
+            type: "default", title: "HBM과 AI 반도체의 시대",
+            body: `여러 DRAM을 수직으로 쌓아 <span style="color:#fbbf24;border-bottom:1px solid #fbbf24;">TSV(실리콘 관통 전극)</span>로 연결한 <b style="color:#fda4af;">HBM(고대역폭 메모리)</b>은 엔비디아 GPU와 짝을 이루며 AI 시대의 필수품이 되었습니다.<br><br>HBM3E는 초당 1.2TB 이상의 데이터를 처리합니다. SK하이닉스가 엔비디아 최우선 공급사로서 AI 슈퍼사이클의 수혜를 받고 있습니다.`
+          },
+          {
+            type: "compare", title: "2nm 이하 공정 패권 전쟁",
+            left: {
+              label: "🇹🇼 TSMC", col: "#60a5fa", bg: "rgba(59,130,246,0.1)", border: "rgba(59,130,246,0.3)",
+              items: ["N2(2nm) 2025년 양산 계획", "Apple·엔비디아 우선 공급", "파운드리 시장 점유율 ~60%", "N2P·A16 차세대 로드맵 공개"]
+            },
+            right: {
+              label: "🇰🇷🇺🇸 삼성·인텔", col: "#fb7185", bg: "rgba(244,63,94,0.1)", border: "rgba(244,63,94,0.3)",
+              items: ["삼성 3nm GAA 양산 (수율 개선 중)", "인텔 18A 공정 2025년 목표", "CHIPS Act 보조금 대규모 수혜", "TSMC 추격전 치열하게 진행 중"]
+            }
+          },
+          {
+            type: "bullets", title: "포스트 실리콘의 시대",
+            sub: "실리콘의 한계를 뛰어넘는 차세대 컴퓨팅 기술들",
+            items: [
+              { icon: "⚛️", col: "#22d3ee", title: "양자 컴퓨팅", desc: "큐비트로 기존 수천 년 연산을\n단시간에 해결 (IBM·Google)" },
+              { icon: "🧠", col: "#c084fc", title: "뉴로모픽 칩", desc: "인간 뇌의 뉴런 구조를 모방\n초저전력으로 AI 연산 수행" },
+              { icon: "💡", col: "#fbbf24", title: "PIM (메모리 내 연산)", desc: "메모리 안에서 연산을 처리\n데이터 이동 병목을 근본 해결" }
+            ]
+          }
+        ]
+      }
+    };
+
+    /* ─── BOOT ─── */
+    const p = new URLSearchParams(location.search);
+    let key = p.get('part') || 'history';
+    if (!PARTS[key]) key = 'history';
+    const D = PARTS[key];
+    let cur = 0;
+
+    // blobs
+    document.getElementById('blob1').style.background = D.blob1;
+    document.getElementById('blob2').style.background = D.blob2;
+
+    // header badge
+    const badge = document.getElementById('hd-badge');
+    badge.textContent = D.num;
+    badge.style.background = D.grad;
+
+    // title
+    const titleEl = document.getElementById('hd-title');
+    titleEl.textContent = 'PART ' + D.num + ': ' + D.title;
+    titleEl.style.background = D.grad;
+    titleEl.style.webkitBackgroundClip = 'text';
+    titleEl.style.webkitTextFillColor = 'transparent';
+
+    // total
+    document.getElementById('tot-num').textContent = D.slides.length;
+
+    // build pip indicators
+    const pipRow = document.getElementById('pip-row');
+    D.slides.forEach((_, i) => {
+      const d = document.createElement('div');
+      d.className = 'progress-pip' + (i === 0 ? ' done' : '');
+      d.id = 'pip-' + i;
+      pipRow.appendChild(d);
+    });
+
+    /* ─── RENDER ─── */
+    function renderSlide(s, idx) {
+      const badgeHTML = '<div style="display:inline-block;padding:2px 10px;background:rgba(15,23,42,0.9);border:1px solid rgba(255,255,255,0.1);border-radius:6px;font-size:10px;font-weight:900;color:#64748b;letter-spacing:0.2em;margin-bottom:12px;">SLIDE ' + String(idx + 1).padStart(2, '0') + '</div>';
+      const hr = '<div style="width:52px;height:3px;background:' + D.grad + ';border-radius:999px;margin:10px 0 16px;"></div>';
+
+      if (s.type === 'default') {
+        return badgeHTML +
+          '<h2 style="font-size:1.9rem;font-weight:900;color:white;line-height:1.2;margin:0 0 4px;">' + s.title + '</h2>' +
+          hr +
+          '<p style="font-size:1rem;color:#94a3b8;line-height:1.8;font-weight:300;">' + s.body + '</p>';
+      }
+
+      if (s.type === 'timeline') {
+        const rows = s.items.map(function (it) {
+          return '<div class="tl">' +
+            '<div class="tldot" style="background:' + D.grad + ';"></div>' +
+            '<div style="display:flex;gap:10px;">' +
+            '<span style="font-size:11px;font-weight:900;width:42px;flex-shrink:0;margin-top:2px;background:' + D.grad + ';-webkit-background-clip:text;-webkit-text-fill-color:transparent;">' + it.year + '</span>' +
+            '<div>' +
+            '<div style="font-size:0.88rem;font-weight:700;color:white;">' + it.title + '</div>' +
+            '<div style="font-size:0.78rem;color:#64748b;margin-top:2px;line-height:1.5;">' + it.desc + '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>';
+        }).join('');
+        return badgeHTML +
+          '<h2 style="font-size:1.7rem;font-weight:900;color:white;margin:0 0 4px;">' + s.title + '</h2>' +
+          hr + rows;
+      }
+
+      if (s.type === 'bullets') {
+        const cols = s.items.length <= 2 ? 2 : 3;
+        const cards = s.items.map(function (it) {
+          return '<div class="bcard">' +
+            '<div style="font-size:1.6rem;margin-bottom:8px;">' + it.icon + '</div>' +
+            '<div style="font-size:0.82rem;font-weight:700;color:' + it.col + ';margin-bottom:6px;">' + it.title + '</div>' +
+            '<div style="font-size:0.76rem;color:#64748b;line-height:1.6;white-space:pre-line;">' + it.desc + '</div>' +
+            '</div>';
+        }).join('');
+        return badgeHTML +
+          '<h2 style="font-size:1.6rem;font-weight:900;color:white;margin:0 0 4px;">' + s.title + '</h2>' +
+          hr +
+          (s.sub ? '<p style="font-size:0.75rem;color:#475569;margin-bottom:10px;">' + s.sub + '</p>' : '') +
+          '<div style="display:grid;grid-template-columns:repeat(' + cols + ',1fr);gap:12px;">' + cards + '</div>';
+      }
+
+      if (s.type === 'compare') {
+        function side(obj) {
+          const items = obj.items.map(function (i) { return '<li style="font-size:0.78rem;color:#94a3b8;display:flex;gap:6px;align-items:flex-start;"><span style="color:#1e3a5f;flex-shrink:0;">▸</span>' + i + '</li>'; }).join('');
+          return '<div class="ccard" style="border:1px solid ' + obj.border + ';background:' + obj.bg + ';">' +
+            '<div style="font-size:0.85rem;font-weight:700;color:' + obj.col + ';margin-bottom:10px;">' + obj.label + '</div>' +
+            '<ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px;">' + items + '</ul>' +
+            '</div>';
+        }
+        return badgeHTML +
+          '<h2 style="font-size:1.6rem;font-weight:900;color:white;margin:0 0 4px;">' + s.title + '</h2>' +
+          hr +
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">' + side(s.left) + side(s.right) + '</div>';
+      }
+      return '';
+    }
+
+    /* ─── SLIDES ─── */
+    const wrap = document.getElementById('slide-wrap');
+    D.slides.forEach(function (s, i) {
+      const div = document.createElement('div');
+      div.id = 'sl-' + i;
+      div.innerHTML = renderSlide(s, i);
+      div.style.display = i === 0 ? 'block' : 'none';
+      wrap.appendChild(div);
+    });
+
+    /* ─── NAVIGATION ─── */
+    function goSlide(dir) {
+      const next = cur + dir;
+      if (next < 0 || next > D.slides.length) return;
+
+      if (next === D.slides.length) { finish(); return; }
+
+      document.getElementById('sl-' + cur).style.display = 'none';
+      document.getElementById('sl-' + next).style.display = 'block';
+
+      // pip
+      document.getElementById('pip-' + cur).classList.remove('done');
+      document.getElementById('pip-' + next).classList.add('done');
+      cur = next;
+      updateNav();
+    }
+    window.goSlide = goSlide;
+
+    function updateNav() {
+      document.getElementById('cur-num').textContent = cur + 1;
+
+      const prev = document.getElementById('btn-prev');
+      if (cur === 0) {
+        prev.className = 'btn-nav btn-prev';
+        prev.disabled = true;
+      } else {
+        prev.className = 'btn-nav btn-prev enabled';
+        prev.disabled = false;
+      }
+
+      const nxt = document.getElementById('btn-next');
+      if (cur === D.slides.length - 1) {
+        nxt.textContent = '✅ 학습 완료 (+100P)';
+        nxt.style.background = 'linear-gradient(135deg,#10b981,#14b8a6)';
+        nxt.style.boxShadow = '0 0 24px rgba(16,185,129,0.35)';
+      } else {
+        nxt.textContent = '다음 슬라이드 →';
+        nxt.style.background = D.grad;
+        nxt.style.boxShadow = '';
+      }
+    }
+
+    // set initial next button color
+    document.getElementById('btn-next').style.background = D.grad;
+
+    function finish() {
+      if (window.opener && !window.opener.closed) {
+        window.opener.earnMileageFromStage(100);
+      }
+      const ov = document.getElementById('overlay');
+      ov.style.display = 'flex';
+      requestAnimationFrame(function () { ov.style.opacity = '1'; });
+      setTimeout(function () { try { window.close(); } catch (e) { } }, 3000);
+    }
+  </script>
+</body>
+
+</html>
